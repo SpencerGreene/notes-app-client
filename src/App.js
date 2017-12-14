@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import { Link } from "react-router-dom";
+import { Link, withRouter } from "react-router-dom";
 import { Nav, NavItem, Navbar } from "react-bootstrap";
 import './App.css';
 import Routes from "./Routes";
 import RouteNavItem from "./components/RouteNavItem";
-import { authUser } from "./libs/awsLib";
+import { authUser, signOutUser } from "./libs/awsLib";
 
 class App extends Component {
   constructor(props) {
@@ -21,7 +21,9 @@ class App extends Component {
   }
 
   handleLogout = event => {
+    signOutUser();
     this.userHasAuthenticated(false);
+    this.props.history.push("/login");
   }
 
   async componentDidMount() {
@@ -71,4 +73,4 @@ class App extends Component {
   }
 }
 
-export default App;
+export default withRouter(App);
