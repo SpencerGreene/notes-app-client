@@ -49,7 +49,6 @@ export default class Signup extends Component {
       alert(e);
     }
 
-    this.setState({ newUser: "test" });
     this.setState({ isLoading: false });
   }
 
