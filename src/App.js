@@ -4,13 +4,15 @@ import { Nav, NavItem, Navbar } from "react-bootstrap";
 import './App.css';
 import Routes from "./Routes";
 import RouteNavItem from "./components/RouteNavItem";
+import { authUser } from "./libs/awsLib";
 
 class App extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      isAuthenticated: false
+      isAuthenticated: false,
+      isAuthenticating: true
     };
   }
 
@@ -22,6 +24,18 @@ class App extends Component {
     this.userHasAuthenticated(false);
   }
 
+  async componentDidMount() {
+    try {
+      if (await authUser()) {
+        this.userHasAuthenticated(true);
+      }
+    } catch (e) {
+      alert(e);
+    }
+
+    this.setState({ isAuthenticating: false });
+  }
+
   render() {
     const childProps = {
       isAuthenticated: this.state.isAuthenticated,
@@ -29,6 +43,7 @@ class App extends Component {
     };
 
     return (
+      !this.state.isAuthenticating &&
       <div className="App container">
         <Navbar fluid collapseOnSelect>
           <Navbar.Header>
