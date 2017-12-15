@@ -1,9 +1,9 @@
 import React, { Component } from "react";
 import { FormGroup, FormControl, ControlLabel } from "react-bootstrap";
 import LoaderButton from "../components/LoaderButton";
+import { invokeApig, s3Upload } from "../libs/awsLib";
 import config from "../config";
 import "./Notes.css";
-import { invokeApig, s3Upload } from "../libs/awsLib";
 
 export default class Notes extends Component {
   constructor(props) {
@@ -12,10 +12,10 @@ export default class Notes extends Component {
     this.file = null;
 
     this.state = {
-      note: null,
-      content: "",
       isLoading: null,
-      isDeleting: null
+      isDeleting: null,
+      note: null,
+      content: ""
     };
   }
 
@@ -33,6 +33,14 @@ export default class Notes extends Component {
 
   getNote() {
     return invokeApig({ path: `/notes/${this.props.match.params.id}` });
+  }
+
+  saveNote(note) {
+    return invokeApig({
+      path: `/notes/${this.props.match.params.id}`,
+      method: "PUT",
+      body: note
+    });
   }
 
   validateForm() {
@@ -85,11 +93,10 @@ export default class Notes extends Component {
     }
   }
 
-  saveNote(note) {
+  deleteNote() {
     return invokeApig({
       path: `/notes/${this.props.match.params.id}`,
-      method: "PUT",
-      body: note
+      method: "DELETE"
     });
   }
 
@@ -105,6 +112,14 @@ export default class Notes extends Component {
     }
 
     this.setState({ isDeleting: true });
+
+    try {
+      await this.deleteNote();
+      this.props.history.push("/");
+    } catch (e) {
+      alert(e);
+      this.setState({ isDeleting: false });
+    }
   }
 
   render() {
@@ -132,30 +147,30 @@ export default class Notes extends Component {
                   </a>
                 </FormControl.Static>
               </FormGroup>}
-              <FormGroup controlId="file">
-                {!this.state.note.attachment &&
-                  <ControlLabel>Attachment</ControlLabel>}
-                  <FormControl onChange={this.handleFileChange} type="file" />
-              </FormGroup>
-              <LoaderButton
-                block
-                bsStyle="primary"
-                bsSize="large"
-                disabled={!this.validateForm()}
-                type="submit"
-                isLoading={this.state.isLoading}
-                text="Save"
-                loadingText="Saving..."
-              />
-              <LoaderButton
-                block
-                bsStyle="danger"
-                bsSize="large"
-                isLoading={this.state.isDeleting}
-                onClick={this.handleDelete}
-                text="Delete"
-                loadingText="Deleting..."
-              />
+            <FormGroup controlId="file">
+              {!this.state.note.attachment &&
+                <ControlLabel>Attachment</ControlLabel>}
+              <FormControl onChange={this.handleFileChange} type="file" />
+            </FormGroup>
+            <LoaderButton
+              block
+              bsStyle="primary"
+              bsSize="large"
+              disabled={!this.validateForm()}
+              type="submit"
+              isLoading={this.state.isLoading}
+              text="Save"
+              loadingText="Saving..."
+            />
+            <LoaderButton
+              block
+              bsStyle="danger"
+              bsSize="large"
+              isLoading={this.state.isDeleting}
+              onClick={this.handleDelete}
+              text="Delete"
+              loadingText="Deleting..."
+            />
           </form>}
       </div>
     );
