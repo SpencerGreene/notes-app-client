@@ -30,13 +30,19 @@ export default class NewNote extends Component {
     this.setState({ isLoading: true });
 
     try {
-      const uploadedFilename = this.file
-        ? (await s3Upload(this.file)).Location
+      const upload = this.file
+        ? (await s3Upload(this.file))
         : null;
+
+      const uploadedFilename = upload ? upload.Location : null;
+      const uploadedKey = upload ? upload.Key : null;
+      console.log("filename is " + uploadedFilename);
+      console.log("filekey is " + uploadedKey);
 
       await this.createNote({
         content: this.state.content,
-        attachment: uploadedFilename
+        attachment: uploadedFilename,
+        attachkey: uploadedKey
       });
       this.props.history.push("/");
     } catch(e) {

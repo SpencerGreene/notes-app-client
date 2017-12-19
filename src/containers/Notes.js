@@ -48,9 +48,11 @@ export default class Notes extends Component {
   }
 
   formatFilename(str) {
-    return str.length < 50
-      ? str
-      : str.substr(0, 20) + "..." + str.substr(str.length - 20, str.length);
+    return (typeof str === 'undefined') ? "" : (
+      str.length < 50
+        ? str
+        : str.substr(0, 20) + "..." + str.substr(str.length - 20, str.length)
+    );
   }
 
   handleChange = event => {
@@ -64,7 +66,7 @@ export default class Notes extends Component {
   }
 
   handleSubmit = async event => {
-    let uploadedFilename;
+    let uploadedFilename, uploadedKey;
 
     event.preventDefault();
 
@@ -77,14 +79,19 @@ export default class Notes extends Component {
 
     try {
       if (this.file) {
-        uploadedFilename = (await s3Upload(this.file))
-          .Location;
+        const upload = await s3Upload(this.file);
+        uploadedFilename = upload.Location;
+        uploadedKey = upload.Key
       }
+
+      console.log("updating file to " + uploadedFilename);
+      console.log("updating filekey to " + uploadedKey);
 
       await this.saveNote({
         ...this.state.note,
         content: this.state.content,
-        attachment: uploadedFilename || this.state.note.attachment
+        attachment: uploadedFilename || this.state.note.attachment,
+        attachkey: uploadedKey
       });
       this.props.history.push("/");
     } catch (e) {
@@ -112,7 +119,6 @@ export default class Notes extends Component {
     }
 
     this.setState({ isDeleting: true });
-    const saveFileName = this.state.note.attachment;
 
     try {
       await this.deleteNote();
@@ -122,10 +128,9 @@ export default class Notes extends Component {
       this.setState({ isDeleting: false });
     }
 
-    if (saveFileName) {
+    if (this.state.note.attachkey) {
       try {
-        alert("deleting: " + saveFileName)
-        await s3Delete(saveFileName);
+        await s3Delete(this.state.note.attachkey);
       } catch(e) {
         alert(e);
         this.setState({ isDeleting: false });  // this gives a warning?!
@@ -158,6 +163,7 @@ export default class Notes extends Component {
                     {this.formatFilename(this.state.note.attachment)}
                   </a>
                 </FormControl.Static>
+                <p>{this.formatFilename(this.state.note.attachkey)}</p>
               </FormGroup>}
             <FormGroup controlId="file">
               {!this.state.note.attachment &&

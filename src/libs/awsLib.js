@@ -95,38 +95,25 @@ export async function s3Upload(file) {
       Key: filename,
       Body: file,
       ContentType: file.type,
-      ACL: "public-read"
+      ACL: "public-read-write"
     })
     .promise();
 }
 
-export async function s3Delete(fileFullName) {
+export async function s3Delete(filename) {
   if (!await authUser()) {
     throw new Error("User is not logged in");
   }
 
   const s3 = new AWS.S3({
-    params: {
-      Bucket: config.s3.BUCKET
-    }
+    params: { Bucket: config.s3.BUCKET }
   });
 
-  const kp = { Key: fileFullName };
-  s3.deleteObject(kp, function(err, data) {
-    if (err) console.log(err, err.stack); // an error occurred
-    else     {
-      console.log("delete succeeded for " + fileFullName);
-      console.log(data);
-    }          // successful response
-
-  });
-/*
   return s3
     .deleteObject({
-      Key: fileFullName
+      Key: filename
     })
     .promise();
-    */
 }
 
 function getUserToken(currentUser) {
