@@ -16,6 +16,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
+    "predeploy": "npm run build",
+    "deploy": "aws s3 sync build/ s3://sg-serverless-stack-tutorial-frontend",
+    "postdeploy": "aws cloudfront create-invalidation --distribution-id E1LVIKEQIFJB7L --paths '/*' && aws cloudfront create-invalidation --distribution-id E1VPZ6HMMO3KUF --paths '/*'",
     "eject": "react-scripts eject"
   }
 }

@@ -86,7 +86,7 @@ export async function s3Upload(file) {
   const s3 = new AWS.S3({
     params: { Bucket: config.s3.BUCKET }
   });
-  
+
   const filename = `${AWS.config.credentials
     .identityId}-${Date.now()}-${file.name}`;
 
@@ -94,7 +94,7 @@ export async function s3Upload(file) {
     .upload({
       Key: filename,
       Body: file,
-      ContentTYpe: file.type,
+      ContentType: file.type,
       ACL: "public-read"
     })
     .promise();
