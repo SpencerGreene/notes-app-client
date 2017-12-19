@@ -100,6 +100,35 @@ export async function s3Upload(file) {
     .promise();
 }
 
+export async function s3Delete(fileFullName) {
+  if (!await authUser()) {
+    throw new Error("User is not logged in");
+  }
+
+  const s3 = new AWS.S3({
+    params: {
+      Bucket: config.s3.BUCKET
+    }
+  });
+
+  const kp = { Key: fileFullName };
+  s3.deleteObject(kp, function(err, data) {
+    if (err) console.log(err, err.stack); // an error occurred
+    else     {
+      console.log("delete succeeded for " + fileFullName);
+      console.log(data);
+    }          // successful response
+
+  });
+/*
+  return s3
+    .deleteObject({
+      Key: fileFullName
+    })
+    .promise();
+    */
+}
+
 function getUserToken(currentUser) {
   return new Promise((resolve, reject) => {
     currentUser.getSession(function(err, session) {

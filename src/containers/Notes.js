@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { FormGroup, FormControl, ControlLabel } from "react-bootstrap";
 import LoaderButton from "../components/LoaderButton";
-import { invokeApig, s3Upload } from "../libs/awsLib";
+import { invokeApig, s3Upload, s3Delete } from "../libs/awsLib";
 import config from "../config";
 import "./Notes.css";
 
@@ -112,6 +112,7 @@ export default class Notes extends Component {
     }
 
     this.setState({ isDeleting: true });
+    const saveFileName = this.state.note.attachment;
 
     try {
       await this.deleteNote();
@@ -120,6 +121,17 @@ export default class Notes extends Component {
       alert(e);
       this.setState({ isDeleting: false });
     }
+
+    if (saveFileName) {
+      try {
+        alert("deleting: " + saveFileName)
+        await s3Delete(saveFileName);
+      } catch(e) {
+        alert(e);
+        this.setState({ isDeleting: false });  // this gives a warning?!
+      }
+    }
+
   }
 
   render() {
