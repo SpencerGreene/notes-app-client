@@ -78,14 +78,13 @@ export default class Notes extends Component {
     this.setState({ isLoading: true });
 
     try {
+      const oldAttachKey = this.state.note.attachkey;
+
       if (this.file) {
         const upload = await s3Upload(this.file);
         uploadedFilename = upload.Location;
         uploadedKey = upload.Key
       }
-
-      console.log("updating file to " + uploadedFilename);
-      console.log("updating filekey to " + uploadedKey);
 
       await this.saveNote({
         ...this.state.note,
@@ -93,6 +92,11 @@ export default class Notes extends Component {
         attachment: uploadedFilename || this.state.note.attachment,
         attachkey: uploadedKey
       });
+
+      if (oldAttachKey) {
+        await s3Delete(oldAttachKey);
+      }
+
       this.props.history.push("/");
     } catch (e) {
       alert(e);
@@ -160,10 +164,9 @@ export default class Notes extends Component {
                     rel="noopener noreferrer"
                     href={this.state.note.attachment}
                   >
-                    {this.formatFilename(this.state.note.attachment)}
+                    {this.formatFilename(this.state.note.attachkey)}
                   </a>
                 </FormControl.Static>
-                <p>{this.formatFilename(this.state.note.attachkey)}</p>
               </FormGroup>}
             <FormGroup controlId="file">
               {!this.state.note.attachment &&

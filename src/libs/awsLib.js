@@ -95,7 +95,7 @@ export async function s3Upload(file) {
       Key: filename,
       Body: file,
       ContentType: file.type,
-      ACL: "public-read-write"
+      ACL: "public-read"
     })
     .promise();
 }
